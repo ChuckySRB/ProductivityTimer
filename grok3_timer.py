@@ -31,10 +31,7 @@ def get_activity():
         try:
             index = int(choice) - 1
             if 0 <= index < len(categories):
-                if categories[index] == "Other":
-                    return input("Enter activity name: ")
-                else:
-                    return categories[index]
+                return categories[index]
             elif index == len(categories):
                 new_cat = input("Enter new category name: ").strip()
                 if new_cat.lower() in [c.lower() for c in categories]:
@@ -45,6 +42,8 @@ def get_activity():
                     print(f"Category '{new_cat}' added.")
                 else:
                     print("Category name cannot be empty.")
+            elif index == 0:
+                return 0
             else:
                 print("Invalid choice.")
         except ValueError:
@@ -120,8 +119,13 @@ def main():
     """Main application loop."""
     is_running = False
     print("Welcome to the Activity Stopwatch App.")
-    print("Type 'start' to begin, 'stop' to end, 'add' to manually add, 'stats' for stats, 'quit' to exit.")
-    
+    print("\nAvailable commands:")
+    print("  start  - Begin a new activity session")
+    print("  stop   - End the current session")
+    print("  add    - Manually add a past activity")
+    print("  stats  - View activity statistics")
+    print("  quit   - Exit the application\n")
+
     while True:
         try:
             command = input("> ").strip().lower()
@@ -139,7 +143,10 @@ def main():
                     duration = (end_time - start_time).total_seconds() / 3600
                     print(f"Session ended. Duration: {duration:.2f} hours")
                     activity = get_activity()
-                    log_session(start_time, end_time, activity)
+                    if activity != 0:
+                        log_session(start_time, end_time, activity)
+                    else:
+                        print("Activity cancelled.")
                 else:
                     print("No session is running.")
             elif command == 'add':
