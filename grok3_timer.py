@@ -1,18 +1,24 @@
 import datetime
 import matplotlib.pyplot as plt
 
+# Constants
+CATEGORIES_FILE = "categories.txt"
+ACTIVITY_LOG_FILE = "activity_log.csv"
+STATS_OUTPUT_FILE = "stats.png"
+DEFAULT_CATEGORIES = ["Sleeping", "Coding", "Training", "Other"]
+
 # Function to save categories to a file
 def save_categories():
-    with open("categories.txt", "w") as f:
+    with open(CATEGORIES_FILE, "w") as f:
         for cat in categories:
             f.write(cat + "\n")
 
 # Load categories from file or use defaults
 try:
-    with open("categories.txt", "r") as f:
+    with open(CATEGORIES_FILE, "r") as f:
         categories = [line.strip() for line in f if line.strip()]
 except FileNotFoundError:
-    categories = ["Sleeping", "Coding", "Training", "Other"]
+    categories = DEFAULT_CATEGORIES
 
 def get_activity():
     """Prompt the user to select or create an activity category."""
@@ -46,17 +52,19 @@ def get_activity():
 
 def log_session(start, end, activity):
     """Log the session details to a CSV file."""
-    with open("activity_log.csv", "a") as f:
+    with open(ACTIVITY_LOG_FILE, "a") as f:
         f.write(f"{start.strftime('%Y-%m-%d %H:%M:%S')},{end.strftime('%Y-%m-%d %H:%M:%S')},{activity}\n")
 
 def get_stats(days):
     """Calculate and plot statistics for the last specified number of days."""
+    # Define the date range
     end_date = datetime.datetime.now()
     start_date = end_date - datetime.timedelta(days=days)
     total_time = {}
-    
+
+    # Read and process the log file
     try:
-        with open("activity_log.csv", "r") as f:
+        with open(ACTIVITY_LOG_FILE, "r") as f:
             for line in f:
                 parts = line.strip().split(",")
                 if len(parts) != 3:
@@ -68,26 +76,45 @@ def get_stats(days):
                 except ValueError:
                     continue
                 if start >= start_date and start < end_date:
-                    duration = (end - start).total_seconds() / 3600
+                    duration = (end - start).total_seconds() / 3600  # Convert to hours
                     total_time[activity] = total_time.get(activity, 0) + duration
     except FileNotFoundError:
         print("No log data found.")
         return
-    
+
+    # Generate statistics and plots
     if total_time:
+        # Print total time per activity
         print(f"Total time spent in the last {days} days:")
         for activity, time in sorted(total_time.items()):
             print(f"{activity}: {time:.2f} hours")
+
+        # Prepare data for plotting
         sorted_activities = sorted(total_time.keys())
         times = [total_time[act] for act in sorted_activities]
-        plt.bar(sorted_activities, times)
-        plt.xlabel("Activity")
-        plt.ylabel("Hours")
-        plt.title(f"Time spent in the last {days} days")
-        plt.savefig("stats.png")
-        print("Statistics plot saved to stats.png")
+
+        # Create a figure with two subplots side by side
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+
+        # Bar chart on the left subplot
+        ax1.bar(sorted_activities, times)
+        ax1.set_xlabel("Activity")
+        ax1.set_ylabel("Hours")
+        ax1.set_title("Bar Chart")
+
+        # Pie chart on the right subplot
+        ax2.pie(times, labels=sorted_activities, autopct='%1.1f%%')
+        ax2.set_title("Pie Chart")
+
+        # Overall title for the figure
+        plt.suptitle(f"Time spent in the last {days} days")
+        
+        # Save the figure
+        plt.savefig(STATS_OUTPUT_FILE)
+        print(f"Statistics plots saved to {STATS_OUTPUT_FILE}")
     else:
         print("No data in the specified range.")
+
 
 def main():
     """Main application loop."""
