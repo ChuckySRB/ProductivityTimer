@@ -126,6 +126,7 @@ def main():
     print("  add    - Manually add a past activity")
     print("  stats  - View activity statistics")
     print("  quit   - Exit the application\n")
+    print("  help   - Show available commands\n")
 
     while True:
         try:
