@@ -1,5 +1,6 @@
 import datetime
 import matplotlib.pyplot as plt
+import os
 
 # Constants
 CATEGORIES_FILE = "categories.txt"
@@ -184,9 +185,18 @@ def main():
             elif command == 'stats':
                 days = int(input("Enter number of days: "))
                 get_stats(days)
+                # open the stats.png file
+                os.startfile(STATS_OUTPUT_FILE)
             elif command == 'quit':
                 print("Goodbye!")
                 break
+            elif command == 'help':
+                print("\nAvailable commands:")
+                print("  start  - Begin a new activity session")
+                print("  stop   - End the current session")
+                print("  add    - Manually add a past activity")
+                print("  stats  - View activity statistics")
+                print("  quit   - Exit the application\n")
             else:
                 print("Invalid command")
         except KeyboardInterrupt:
@@ -194,4 +204,9 @@ def main():
             break
 
 if __name__ == "__main__":
+    OUTPUT_DIR = "outputs"
+    ROOT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), OUTPUT_DIR)
+    CATEGORIES_FILE = os.path.join(ROOT_DIR, "categories.txt")
+    ACTIVITY_LOG_FILE = os.path.join(ROOT_DIR, "activity_log.csv")
+    STATS_OUTPUT_FILE = os.path.join(ROOT_DIR, "stats.png")
     main()
